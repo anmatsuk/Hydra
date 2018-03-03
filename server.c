@@ -1,17 +1,15 @@
 #include "socket.h"
 
-
+FILE 	*fd = NULL;
 
 static void	info(char *message)
 {
-	FILE *fd = NULL;
+	printf("%s\n", message);
 	if (fd)
 	{
 		fprintf(fd, "%s\n", message);
 		fflush(fd);
 	}
-	else
-		printf("%s\n", message);
 	return ;
 }
 
@@ -28,7 +26,11 @@ void *thread_init(void *socket_dest)
     {
         *(client_message + read_size) = '\0';
         printf("Client ( %d ) message :   ", sock);
-
+        if (fd)
+        {
+        	fprintf(fd,"Client ( %d ) message :   ", sock);
+        	fflush(fd);
+        }
         info(client_message);
         if (strcmp(client_message, "ping") == 0)
         	write(sock , "pong pong" , 9);
@@ -38,7 +40,11 @@ void *thread_init(void *socket_dest)
     if(read_size == 0)
     {
         printf("Client ( %d ) disconnected ... \n", sock);
-        fflush(stdout);
+        if (fd)
+        {
+        	fprintf(fd, "Client ( %d ) disconnected ... \n", sock);
+        	fflush(fd);
+        }
     }
     else if(read_size == -1)
 		info("Recieving failed ... \n");
@@ -50,7 +56,6 @@ void *thread_init(void *socket_dest)
 	return (0);
 }
 
-
 int		start_server(int process_id)
 {
 	struct	sockaddr_in server, client;
@@ -59,15 +64,10 @@ int		start_server(int process_id)
 	
 	if (process_id == 0)
 	{
-		FILE 	*fp = NULL;
-		fp = fopen ("Log.txt", "w+");
-		fprintf(fp, "Logging info...\n");
-		fflush(fp);
-		fclose(fp);
-			
+		fd = fopen ("/tmp/Log.txt", "w+");
+		fprintf(fd, "Logging info...\n");
+		fflush(fd);
 	}
-	//fprintf(fp, "Logging info...\n");
-	//fflush(fp);
 	server_fd = socket(AF_INET , SOCK_STREAM , 0);
 	if (server_fd == -1)
 	{
@@ -85,7 +85,7 @@ int		start_server(int process_id)
 		return (1);
 	}
 	info("Bind done.\n");
-	listen(server_fd, 3); //backlog 3 - number of max connections for the socket
+	listen(server_fd, 3);
 	info("Waiting for incoming connections ... \n");
 	size = sizeof(struct sockaddr_in);
 
@@ -102,7 +102,8 @@ int		start_server(int process_id)
             return 1;
         }
 	}
-	//fclose(fd);
+	if (fd)
+		fclose(fd);
 	if (client_fd < 0)
 	{
 		info("Acception failed ... ");

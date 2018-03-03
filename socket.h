@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 
 #define BUFF_SIZE	256
-#define PORT		4141
+#define PORT		8288
 
 
 #endif

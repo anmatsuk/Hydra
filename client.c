@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#define	PORT 4141
+#define	PORT 8288
 
 char* scan_line(char* buffer, int buffer_size) {
    char		*p = buffer;
